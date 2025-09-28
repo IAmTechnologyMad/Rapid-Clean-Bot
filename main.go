@@ -40,7 +40,7 @@ func main() {
 		updates, err := getUpdates(offset)
 		if err != nil {
 			log.Println("getUpdates error:", err)
-			time.Sleep(2 * time.Hour)
+			time.Sleep(5 * time.Second) // retry quickly
 			continue
 		}
 
@@ -51,9 +51,9 @@ func main() {
 				msgID := upd.Message.MessageID
 				log.Printf("📩 Got message %d in chat %d", msgID, chatID)
 
-				// Schedule deletion after 1 min
+				// Schedule deletion after 3 hours
 				go func(cID int64, mID int) {
-					time.Sleep(1 * time.Minute)
+					time.Sleep(3 * time.Hour)
 					if err := deleteMessage(cID, mID); err != nil {
 						log.Printf("❌ Delete failed for %d: %v", mID, err)
 					} else {
