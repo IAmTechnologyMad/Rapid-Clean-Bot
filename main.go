@@ -14,7 +14,7 @@ import (
 const (
 	botToken   = "7876416156:AAG3cXPdF44mYuH0s5-ldebx7GKjbLV3WHc"        // ⚠️ Replace with your bot token
 	groupChat  = "-4985438208"           // ⚠️ Replace with your group chat ID
-	renderURL  = "https://your-bot.onrender.com" // ⚠️ Replace with your Render URL
+	renderURL  = "https://rapid-clean-bot.onrender.com" // ⚠️ Replace with your Render URL
 	deleteAfter = 3 * time.Hour          // Time after which messages are deleted
 )
 
@@ -159,3 +159,4 @@ func startKeepAlive(url string) {
 		}
 	}()
 }
+
