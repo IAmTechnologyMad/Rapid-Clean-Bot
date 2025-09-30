@@ -17,7 +17,7 @@ const (
 	botToken    = "7876416156:AAG3cXPdF44mYuH0s5-ldebx7GKjbLV3WHc" // ⚠️ Replace with your bot token
 	groupChatID = "-4985438208"                                    // ⚠️ Replace with your group chat ID
 	renderURL   = "https://rapid-clean-bot.onrender.com"           // ⚠️ Replace with your Render URL
-	deleteAfter = 3 * time.Minute                                    // Time after which messages are deleted
+	deleteAfter = 3 * time.Minute                                  // Time after which messages are deleted
 )
 
 // --- STRUCTS ---
@@ -106,6 +106,13 @@ func main() {
 	// Verify bot token
 	if err := verifyBot(); err != nil {
 		log.Fatalf("❌ Failed to verify bot: %v", err)
+	}
+
+	// Delete webhook to allow polling (CRITICAL FIX)
+	if err := deleteWebhook(); err != nil {
+		log.Printf("⚠️ Warning: Could not delete webhook: %v", err)
+	} else {
+		log.Println("✅ Webhook removed - polling enabled")
 	}
 
 	// Start HTTP server for Render keep-alive
@@ -200,6 +207,29 @@ func verifyBot() error {
 	}
 	
 	return nil
+}
+
+// --- DELETE WEBHOOK (FIX FOR POLLING) ---
+func deleteWebhook() error {
+	log.Println("🔧 Attempting to delete webhook...")
+	
+	resp, err := http.Get(fmt.Sprintf("https://api.telegram.org/bot%s/deleteWebhook?drop_pending_updates=true", botToken))
+	if err != nil {
+		return fmt.Errorf("network error: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return fmt.Errorf("decode error: %v", err)
+	}
+
+	if ok, exists := result["ok"].(bool); exists && ok {
+		log.Println("✅ Webhook deleted successfully - bot can now use polling")
+		return nil
+	}
+	
+	return fmt.Errorf("failed to delete webhook: %v", result["description"])
 }
 
 // --- SCHEDULE DELETE ---
